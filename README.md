@@ -92,10 +92,4 @@ flutter test
 
 ---
 
-## Test & Demo Accounts
 
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **New Student** | *(Register any `@adssu.edu.ph` email)* | *(Any 6+ char password)* |
-| **Demo Student** | `student@adssu.edu.ph` | `password123` |
-| **Campus Admin** | `admin@adssu.edu.ph` | `admin123` |
