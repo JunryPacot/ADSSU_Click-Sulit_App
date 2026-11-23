@@ -6,6 +6,9 @@ import 'package:adssu_click_and_sulit/core/theme/app_theme.dart';
 import 'package:adssu_click_and_sulit/data/mock/mock_database.dart';
 import 'package:adssu_click_and_sulit/data/mock/seed_data.dart';
 import 'package:adssu_click_and_sulit/data/models/item_model.dart';
+import 'package:adssu_click_and_sulit/features/auth/login_screen.dart';
+import 'package:adssu_click_and_sulit/features/auth/onboarding_screens.dart';
+import 'package:adssu_click_and_sulit/features/auth/register_step1_screen.dart';
 import 'package:adssu_click_and_sulit/features/home/home_screen.dart';
 import 'package:adssu_click_and_sulit/features/items/item_detail_screen.dart';
 import 'package:adssu_click_and_sulit/features/items/add_edit_item_screen.dart';
@@ -48,7 +51,7 @@ void main() {
       await tester.pumpWidget(_createTestWidget(const SavedItemsScreen(), db));
       await tester.pumpAndSettle();
 
-      expect(find.text('Saved Items (Local Storage)'), findsOneWidget);
+      expect(find.text('Saved Items'), findsOneWidget);
       expect(find.textContaining('Campus Items'), findsOneWidget);
       expect(find.textContaining('External Deals'), findsOneWidget);
     });
@@ -104,9 +107,35 @@ void main() {
       await tester.pumpWidget(_createTestWidget(AddEditItemScreen(itemToEdit: testItem), db));
       await tester.pumpAndSettle();
 
-      expect(find.text('Edit Listing (CRUD Update)'), findsOneWidget);
+      expect(find.text('Edit Listing'), findsOneWidget);
       expect(find.text('Algorithms in C++'), findsOneWidget);
       expect(find.text('Computer Science Textbook'), findsOneWidget);
+    });
+
+    testWidgets('Auth & Onboarding: Register Step 1 has NO student ID field and requires name/email', (tester) async {
+      final db = MockDatabase();
+      await tester.pumpWidget(_createTestWidget(const RegisterStep1Screen(), db));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Create Account'), findsOneWidget);
+      expect(find.text('Full Name'), findsOneWidget);
+      expect(find.textContaining('Email Address'), findsOneWidget);
+      // Verify that Student ID field is NOT present
+      expect(find.text('Student or Employee ID'), findsNothing);
+      expect(find.text('Student ID'), findsNothing);
+      expect(find.text('Continue to Password Setup'), findsOneWidget);
+    });
+
+    testWidgets('Auth: Login Screen renders logo and input fields', (tester) async {
+      final db = MockDatabase();
+      await tester.pumpWidget(_createTestWidget(const LoginScreen(), db));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Campus Sign In'), findsOneWidget);
+      expect(find.text('Email Address'), findsOneWidget);
+      expect(find.text('Password'), findsOneWidget);
+      expect(find.text('Sign In'), findsOneWidget);
+      expect(find.text('Create Account'), findsOneWidget);
     });
   });
 }

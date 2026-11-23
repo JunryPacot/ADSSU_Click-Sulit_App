@@ -43,7 +43,7 @@ class _SavedItemsScreenState extends State<SavedItemsScreen> with SingleTickerPr
         backgroundColor: AppColors.primaryDarkGreen,
         foregroundColor: AppColors.cardWhite,
         title: const Text(
-          'Saved Items (Local Storage)',
+          'Saved Items',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
         bottom: TabBar(
@@ -58,42 +58,13 @@ class _SavedItemsScreenState extends State<SavedItemsScreen> with SingleTickerPr
           ],
         ),
       ),
-      body: Column(
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          // Banner explaining Local Storage Persistence
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.accentGold.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.4)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.storage_rounded, size: 20, color: AppColors.textDark),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'TASK 2 (PERSISTENCE): Records here are stored in SharedPreferences and remain available even after you close and reopen the app.',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textDark),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab 1: Saved Campus Items
-                _buildCampusItemsList(context, savedCampus, db),
-                // Tab 2: Saved External Deals
-                _buildExternalDealsList(context, savedApi, db),
-              ],
-            ),
-          ),
+          // Tab 1: Saved Campus Items
+          _buildCampusItemsList(context, savedCampus, db),
+          // Tab 2: Saved External Deals
+          _buildExternalDealsList(context, savedApi, db),
         ],
       ),
     );

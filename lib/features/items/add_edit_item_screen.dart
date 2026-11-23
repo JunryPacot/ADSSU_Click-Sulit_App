@@ -104,15 +104,14 @@ class _AddEditItemScreenState extends State<AddEditItemScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Item successfully posted and saved to SharedPreferences!'),
+            content: Text('Item successfully posted!'),
             backgroundColor: AppColors.primaryDarkGreen,
           ),
         );
         context.pop();
       }
     } else {
-      // ==================== CRUD 2: UPDATE ====================
-      // Updates existing listing in device SharedPreferences
+      // Updates existing listing
       final updated = widget.itemToEdit!.copyWith(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -128,7 +127,7 @@ class _AddEditItemScreenState extends State<AddEditItemScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Item successfully updated in SharedPreferences!'),
+            content: Text('Item successfully updated!'),
             backgroundColor: AppColors.primaryDarkGreen,
           ),
         );
@@ -147,7 +146,7 @@ class _AddEditItemScreenState extends State<AddEditItemScreen> {
         backgroundColor: AppColors.primaryDarkGreen,
         foregroundColor: AppColors.cardWhite,
         title: Text(
-          isEditing ? 'Edit Listing (CRUD Update)' : 'Post New Item (CRUD Create)',
+          isEditing ? 'Edit Listing' : 'Post New Item',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
       ),
@@ -158,30 +157,6 @@ class _AddEditItemScreenState extends State<AddEditItemScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Info Banner explaining CRUD
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.accentGold.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.4)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.storage, size: 20, color: AppColors.textDark),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        isEditing
-                            ? 'TASK 2 (UPDATE): Modifying this record updates data in local SharedPreferences.'
-                            : 'TASK 2 (CREATE): Submitting this form saves the record to local SharedPreferences.',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textDark),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
 
               // Title Field
               const Text('Item Title *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),

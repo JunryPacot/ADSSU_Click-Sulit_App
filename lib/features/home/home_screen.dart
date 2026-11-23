@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Saved Items (SharedPreferences)',
+            tooltip: 'Saved Items',
             icon: Badge(
               label: Text('${db.savedItems.length + db.savedExternalProducts.length}'),
               child: const Icon(Icons.bookmark_rounded, color: AppColors.cardWhite),
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          // Banner for Task 1: External REST API Integration
+          // Banner for Campus Partner Deals
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.all(16),
@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
-                            'LAB TASK 1: REST API',
+                            'PARTNER ESSENTIALS',
                             style: TextStyle(
                               color: AppColors.textDark,
                               fontSize: 10,
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Live product data from REST API with PHP currency conversion',
+                          'Special supplies & discounts for ADSSU community',
                           style: TextStyle(
                             color: AppColors.paleGreen,
                             fontSize: 12,

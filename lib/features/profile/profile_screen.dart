@@ -81,7 +81,7 @@ class ProfileScreen extends StatelessWidget {
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile updated and saved to SharedPreferences!')),
+                    const SnackBar(content: Text('Profile updated successfully!')),
                   );
                 }
               }
@@ -175,7 +175,7 @@ class ProfileScreen extends StatelessWidget {
                       side: const BorderSide(color: AppColors.primaryDarkGreen),
                     ),
                     icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('Edit Profile (CRUD Update)'),
+                    label: const Text('Edit Profile'),
                     onPressed: () => _showEditProfileDialog(context, db),
                   ),
                 ],
@@ -280,7 +280,7 @@ class ProfileScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 icon: const Icon(Icons.logout, size: 18),
-                label: const Text('Log Out (Clear Session in SharedPreferences)'),
+                label: const Text('Log Out'),
                 onPressed: () async {
                   await db.logout();
                   if (context.mounted) {

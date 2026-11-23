@@ -43,9 +43,8 @@ class ItemDetailScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
-          // Bookmark to SharedPreferences
           IconButton(
-            tooltip: currentItem.isSaved ? 'Remove from Saved' : 'Save to Local Storage',
+            tooltip: currentItem.isSaved ? 'Remove from Wishlist' : 'Save to Wishlist',
             icon: Icon(
               currentItem.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
               color: currentItem.isSaved ? AppColors.accentGold : AppColors.cardWhite,
@@ -56,8 +55,8 @@ class ItemDetailScreen extends StatelessWidget {
                 SnackBar(
                   content: Text(
                     currentItem.isSaved
-                        ? 'Removed from Saved Items'
-                        : 'Saved to Local Storage (SharedPreferences)!',
+                        ? 'Removed from Wishlist'
+                        : 'Saved to Wishlist!',
                   ),
                   duration: const Duration(seconds: 1),
                 ),
@@ -71,29 +70,6 @@ class ItemDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Parameter Passing Banner
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.midGreen.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.midGreen.withValues(alpha: 0.3)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info_outline, size: 16, color: AppColors.primaryDarkGreen),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'TASK 3: Displaying parameters passed from the Marketplace list.',
-                      style: TextStyle(fontSize: 11, color: AppColors.primaryDarkGreen, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Item Title
             Text(
               currentItem.title,

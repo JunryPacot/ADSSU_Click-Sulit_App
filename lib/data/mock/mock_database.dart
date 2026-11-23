@@ -260,15 +260,19 @@ class MockDatabase extends ChangeNotifier {
     required String name,
     required String email,
     required String college,
-    required String studentId,
+    String? studentId,
     required String password,
   }) async {
+    final actualStudentId = (studentId != null && studentId.trim().isNotEmpty)
+        ? studentId.trim()
+        : '2024-ADSSU-${_uuid.v4().substring(0, 4).toUpperCase()}';
+
     final newUser = UserModel(
       id: 'user_${_uuid.v4().substring(0, 8)}',
       name: name.trim(),
       email: email.trim().toLowerCase(),
       college: college.trim(),
-      studentId: studentId.trim(),
+      studentId: actualStudentId,
       isVerified: true,
       bio: 'ADSSU Student',
     );
@@ -283,14 +287,10 @@ class MockDatabase extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Logs into the application with institutional email validation.
+  /// Logs into the application with email validation.
   Future<bool> login(String email, String password) async {
     final cleanEmail = email.trim().toLowerCase();
-
-    // Enforce ADSSU institutional domain
-    if (!cleanEmail.endsWith('@adssu.edu.ph')) {
-      return false;
-    }
+    if (cleanEmail.isEmpty) return false;
 
     final passwords = await _storage.loadPasswords();
     final storedPass = passwords[cleanEmail];
@@ -306,13 +306,18 @@ class MockDatabase extends ChangeNotifier {
       return true;
     }
 
-    // Auto-create demo student session if logging in for the first time
+    // If not previously registered, enforce ADSSU institutional domain for auto-login
+    if (!cleanEmail.endsWith('@adssu.edu.ph')) {
+      return false;
+    }
+
+    // Auto-create student session if logging in for first time with institutional email
     final newUser = UserModel(
       id: 'user_${_uuid.v4().substring(0, 8)}',
       name: cleanEmail.split('@').first.replaceAll('.', ' ').toUpperCase(),
       email: cleanEmail,
       college: 'College of Computing and Information Sciences (CCIS)',
-      studentId: '2024-ADSSU-${_uuid.v4().substring(0, 4)}',
+      studentId: '2024-ADSSU-${_uuid.v4().substring(0, 4).toUpperCase()}',
       isVerified: true,
     );
 

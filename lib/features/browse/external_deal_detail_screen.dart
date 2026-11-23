@@ -32,7 +32,7 @@ class ExternalDealDetailScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            tooltip: isSaved ? 'Remove from Wishlist' : 'Save to SharedPreferences',
+            tooltip: isSaved ? 'Remove from Wishlist' : 'Save Deal',
             icon: Icon(
               isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
               color: isSaved ? AppColors.accentGold : AppColors.cardWhite,
@@ -43,8 +43,8 @@ class ExternalDealDetailScreen extends StatelessWidget {
                 SnackBar(
                   content: Text(
                     isSaved
-                        ? 'Removed from Saved Items'
-                        : 'Saved to Local Storage (SharedPreferences)!',
+                        ? 'Removed from Wishlist'
+                        : 'Saved to Wishlist!',
                   ),
                   duration: const Duration(seconds: 1),
                 ),
@@ -58,29 +58,6 @@ class ExternalDealDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Parameter Passing Info Banner
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.midGreen.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.midGreen.withValues(alpha: 0.3)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info_outline, size: 16, color: AppColors.primaryDarkGreen),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'TASK 3: Displaying API product parameters passed from External Deals.',
-                      style: TextStyle(fontSize: 11, color: AppColors.primaryDarkGreen, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Product Image
             ClipRRect(
               borderRadius: BorderRadius.circular(16),

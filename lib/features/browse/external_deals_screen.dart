@@ -107,7 +107,7 @@ class _ExternalDealsScreenState extends State<ExternalDealsScreen> {
               ),
             ),
             const Text(
-              'Live REST API',
+              'Campus Deals & Essentials',
               style: TextStyle(fontSize: 10, color: AppColors.mutedGray),
             ),
           ],
@@ -142,14 +142,14 @@ class _ExternalDealsScreenState extends State<ExternalDealsScreen> {
                   ),
               ],
             ),
-            tooltip: 'View Saved External Items',
+            tooltip: 'Saved Deals',
             onPressed: () => context.push('/saved-items'),
           ),
 
           // Reload data button
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Refresh API Data',
+            tooltip: 'Refresh Deals',
             onPressed: () => _loadProducts(),
           ),
         ],
@@ -250,7 +250,7 @@ class _ExternalDealsScreenState extends State<ExternalDealsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Fetching live marketplace data from API...',
+              'Loading student deals...',
               style: TextStyle(
                 color: AppColors.textDark.withOpacity(0.8),
                 fontSize: 14,
