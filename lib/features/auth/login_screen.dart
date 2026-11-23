@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/campus_constants.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/widgets/primary_button.dart';
-import '../../core/widgets/wave_header.dart';
 import '../../data/mock/mock_database.dart';
 
+/// Screen 0: Student Login Screen
+/// Validates institutional @adssu.edu.ph credentials and establishes persistent session in SharedPreferences.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -18,11 +16,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  final _emailController = TextEditingController(text: 'student@adssu.edu.ph');
+  final _passwordController = TextEditingController(text: 'password123');
+  bool _isLoading = false;
   String? _errorMessage;
-  bool _isLoggingIn = false;
 
   @override
   void dispose() {
@@ -35,46 +32,39 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final clean = email.toLowerCase();
-    if (!clean.endsWith('@adssu.edu.ph')) {
-      context.push('/login-error');
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your student email and password.');
       return;
     }
 
-    if (password.isEmpty) {
-      setState(() => _errorMessage = 'Please enter your password.');
+    if (!email.toLowerCase().endsWith('@adssu.edu.ph')) {
+      setState(() => _errorMessage = 'Access restricted: Only official @adssu.edu.ph emails are permitted.');
       return;
     }
 
     setState(() {
-      _isLoggingIn = true;
+      _isLoading = true;
       _errorMessage = null;
     });
 
     try {
       final db = context.read<MockDatabase>();
-      final success = await db.login(clean, password);
-      if (!mounted) return;
+      final success = await db.login(email, password);
 
+      if (!mounted) return;
       if (success) {
-        SharedPreferences.getInstance().then((p) => p.setBool('has_seen_onboarding', true)).catchError((_) => false);
-        if (clean == CampusConstants.demoAdminEmail.toLowerCase()) {
-          context.go('/admin/dashboard');
-        } else {
-          context.go('/home');
-        }
+        context.go('/');
       } else {
         setState(() {
-          _errorMessage = 'Incorrect password. Please verify your password or tap Forgot Password.';
-          _isLoggingIn = false;
+          _errorMessage = 'Invalid institutional email domain.';
+          _isLoading = false;
         });
       }
     } catch (e) {
       if (!mounted) return;
-      final msg = e.toString().replaceAll('Exception: ', '').replaceAll('FirebaseAuthException: ', '');
       setState(() {
-        _errorMessage = msg;
-        _isLoggingIn = false;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _isLoading = false;
       });
     }
   }
@@ -83,220 +73,152 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Top Signature Wave Header
-            Stack(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const WaveHeader(height: 120),
-                Positioned(
-                  top: 40,
-                  right: 16,
+                // App Logo Card
+                Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.cardWhite.withAlpha(40),
-                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.cardWhite,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                    child: const Text(
-                      'SSO PORTAL',
-                      style: TextStyle(
-                        color: AppColors.cardWhite,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
+                    child: Image.asset(
+                      AppAssets.logo,
+                      width: 90,
+                      height: 90,
+                      fit: BoxFit.contain,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Title & Subtitle
+                const Text(
+                  CampusConstants.appTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryDarkGreen,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Campus Peer-to-Peer Marketplace & Circular Economy',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMedium,
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Error Banner
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(color: Colors.red.shade800, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Email Input
+                const Text('Institutional Student Email', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.midGreen),
+                    hintText: 'student@adssu.edu.ph',
+                    filled: true,
+                    fillColor: AppColors.cardWhite,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Password Input
+                const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_outline, size: 20, color: AppColors.midGreen),
+                    hintText: '••••••••',
+                    filled: true,
+                    fillColor: AppColors.cardWhite,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Login Button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDarkGreen,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: _isLoading ? null : _handleLogin,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text(
+                          'Log In to Campus Marketplace',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                ),
+                const SizedBox(height: 12),
+
+                // Quick Demo bypass button
+                TextButton(
+                  onPressed: () => context.go('/'),
+                  child: const Text(
+                    'Explore Marketplace as Demo Student →',
+                    style: TextStyle(color: AppColors.midGreen, fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                 ),
               ],
             ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Logo Card
-                  Container(
-                    width: 180,
-                    height: 80,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardWhite,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: AppTheme.cardShadow,
-                    ),
-                    child: Image.asset(
-                      AppAssets.logo,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Tagline Pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentGold.withAlpha(40),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      CampusConstants.appTagline,
-                      style: TextStyle(
-                        color: AppColors.textDark,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Title & Subtitle
-                  Text(
-                    'Welcome Back, Adssunian!',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Sign in with your official ADSSU credentials',
-                    style: TextStyle(
-                      color: AppColors.mutedGray,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
-                  // Institutional Email Field
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Student / Institutional Email',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          hintText: 'yourname@adssu.edu.ph',
-                          prefixIcon: Icon(Icons.school_outlined, color: AppColors.primaryDarkGreen),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password Field
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Password',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          hintText: '••••••••',
-                          prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primaryDarkGreen),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                              color: AppColors.mutedGray,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Forgot Password Link -> Screen 6
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => context.push('/forgot-password'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.midGreen,
-                        padding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: AppColors.statusError, fontSize: 12),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-
-                  // Sign In Button
-                  _isLoggingIn
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.primaryDarkGreen))
-                    : PrimaryButton(
-                        label: 'Sign In',
-                        icon: Icons.login_rounded,
-                        onPressed: _handleLogin,
-                      ),
-                   const SizedBox(height: 24),
-
-                  // Register Link -> Screen 8
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      const Text(
-                        "Don't have an account? ",
-                        style: TextStyle(fontSize: 13, color: AppColors.mutedGray),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.push('/register-1'),
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDarkGreen,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-

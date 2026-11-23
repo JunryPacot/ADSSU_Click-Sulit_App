@@ -18,6 +18,7 @@ class AppColors {
   static const Color accentGold = Color(0xFFC9A227);
   static const Color textDark = Color(0xFF1F2A22);
   static const Color mutedGray = Color(0xFF5E6B62);
+  static const Color textMedium = Color(0xFF5E6B62);
   static const Color background = Color(0xFFF3F9F5);
   static const Color cardWhite = Color(0xFFFFFFFF);
 

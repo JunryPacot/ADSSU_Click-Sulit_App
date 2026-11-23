@@ -107,7 +107,7 @@ class _ExternalDealsScreenState extends State<ExternalDealsScreen> {
               ),
             ),
             const Text(
-              'Live REST API • DummyJSON / FakeStore',
+              'Live REST API',
               style: TextStyle(fontSize: 10, color: AppColors.mutedGray),
             ),
           ],
@@ -386,17 +386,23 @@ class _ExternalDealsScreenState extends State<ExternalDealsScreen> {
     bool isSaved,
     MockDatabase db,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isSaved ? AppColors.accentGold : AppColors.borderLight,
-          width: isSaved ? 1.5 : 1.0,
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () {
+        // PARAMETER PASSING: Passes the ExternalProductModel to ExternalDealDetailScreen!
+        context.push('/deal-detail', extra: product);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.cardWhite,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSaved ? AppColors.accentGold : AppColors.borderLight,
+            width: isSaved ? 1.5 : 1.0,
+          ),
+          boxShadow: AppTheme.cardShadow,
         ),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Column(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Product Image & Action Badges
@@ -621,6 +627,7 @@ class _ExternalDealsScreenState extends State<ExternalDealsScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }

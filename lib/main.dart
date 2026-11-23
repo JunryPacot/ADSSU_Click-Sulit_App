@@ -8,9 +8,13 @@ import 'data/mock/mock_database.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize and restore persistent local storage
-  final db = MockDatabase();
-  await db.restorePersistedData();
+  // Initialize and restore persistent local storage with safety guard
+  try {
+    final db = MockDatabase();
+    await db.restorePersistedData();
+  } catch (e, stack) {
+    debugPrint('[main] Warning restoring persistent storage on boot: $e\n$stack');
+  }
 
   runApp(const AdssuClickAndSulitApp());
 }

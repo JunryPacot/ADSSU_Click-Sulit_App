@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "904465393499",
+    "firebase_url": "https://adssu-click-sulit-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "adssu-click-sulit",
+    "storage_bucket": "adssu-click-sulit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:904465393499:android:46d84accd954e7eba75c7e",
+        "android_client_info": {
+          "package_name": "com.adssunian.adssu_click_and_sulit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "904465393499-vn7bi4qoh6i5bfnlquvsc7vf8tej24jd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adssunian.adssu_click_and_sulit",
+            "certificate_hash": "c28572b5b0ebef18ebb483c79e6aafce02d7675c"
+          }
+        },
+        {
+          "client_id": "904465393499-h9gqfbb9g82l0pd280sopbf1mcv6pbg4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOuiST060AgO0cJF7s5ZjAsO7TIE-S5Sw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "904465393499-h9gqfbb9g82l0pd280sopbf1mcv6pbg4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

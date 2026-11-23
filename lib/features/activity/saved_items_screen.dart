@@ -1,263 +1,251 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/widgets/item_card.dart';
-import '../../data/mock/mock_database.dart';
+import '../../data/models/item_model.dart';
 import '../../data/models/external_product_model.dart';
+import '../../data/mock/mock_database.dart';
 
-/// Screen displaying items saved in local storage (Wishlist).
-/// Fulfills Laboratory Exercise 4 Task 2 & Task 3:
-/// - Retrieve saved records from device storage (READ)
-/// - Delete saved records on request (DELETE)
-class SavedItemsScreen extends StatelessWidget {
+/// Screen 5: Saved Items Screen
+/// Fulfills Task 1 (Screen Development), Task 2 (Stack Navigation),
+/// and Task 2 of Lab 2 (Local Data Storage: READ & DELETE from SharedPreferences).
+class SavedItemsScreen extends StatefulWidget {
   const SavedItemsScreen({super.key});
+
+  @override
+  State<SavedItemsScreen> createState() => _SavedItemsScreenState();
+}
+
+class _SavedItemsScreenState extends State<SavedItemsScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final db = context.watch<MockDatabase>();
-    final savedCampusItems = db.items.where((i) => i.isSaved).toList();
-    final savedExternal = db.savedExternalProducts;
-    final totalCount = savedCampusItems.length + savedExternal.length;
+    final savedCampus = db.savedItems;
+    final savedApi = db.savedExternalProducts;
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: Text(
-            'Saved Items ($totalCount)',
-            style: GoogleFonts.merriweather(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          bottom: TabBar(
-            indicatorColor: AppColors.primaryDarkGreen,
-            labelColor: AppColors.primaryDarkGreen,
-            unselectedLabelColor: AppColors.mutedGray,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            tabs: [
-              Tab(
-                text: 'Campus Items (${savedCampusItems.length})',
-                icon: const Icon(Icons.school_rounded, size: 18),
-              ),
-              Tab(
-                text: 'External Deals (${savedExternal.length})',
-                icon: const Icon(Icons.public_rounded, size: 18),
-              ),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primaryDarkGreen,
+        foregroundColor: AppColors.cardWhite,
+        title: const Text(
+          'Saved Items (Local Storage)',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
-        body: SafeArea(
-          child: TabBarView(
-            children: [
-              // Tab 1: Campus Marketplace Saved Items
-              _buildCampusTab(context, db, savedCampusItems),
-
-              // Tab 2: External REST API Products Saved in Local Storage
-              _buildExternalTab(context, db, savedExternal),
-            ],
-          ),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: AppColors.accentGold,
+          indicatorWeight: 3,
+          labelColor: AppColors.accentGold,
+          unselectedLabelColor: AppColors.cardWhite.withValues(alpha: 0.7),
+          tabs: [
+            Tab(text: 'Campus Items (${savedCampus.length})'),
+            Tab(text: 'External Deals (${savedApi.length})'),
+          ],
         ),
+      ),
+      body: Column(
+        children: [
+          // Banner explaining Local Storage Persistence
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.accentGold.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.4)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.storage_rounded, size: 20, color: AppColors.textDark),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'TASK 2 (PERSISTENCE): Records here are stored in SharedPreferences and remain available even after you close and reopen the app.',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: Saved Campus Items
+                _buildCampusItemsList(context, savedCampus, db),
+                // Tab 2: Saved External Deals
+                _buildExternalDealsList(context, savedApi, db),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCampusTab(BuildContext context, MockDatabase db, List items) {
-    if (items.isEmpty) {
-      return Center(
+  Widget _buildCampusItemsList(BuildContext context, List<ItemModel> list, MockDatabase db) {
+    if (list.isEmpty) {
+      return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.favorite_border_rounded, size: 54, color: AppColors.mutedGray),
-            const SizedBox(height: 12),
-            const Text(
+            Icon(Icons.bookmark_border_rounded, size: 54, color: AppColors.textMedium),
+            SizedBox(height: 12),
+            Text(
               'No saved campus items yet.',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark),
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Tap the heart icon on any campus listing to bookmark it.',
-              style: TextStyle(fontSize: 12, color: AppColors.mutedGray),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryDarkGreen,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () => context.go('/home'),
-              child: const Text('Browse Campus Items'),
+            SizedBox(height: 6),
+            Text(
+              'Tap the bookmark icon on any marketplace item to save it locally.',
+              style: TextStyle(fontSize: 12, color: AppColors.textMedium),
             ),
           ],
         ),
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: items.length,
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: list.length,
       itemBuilder: (context, index) {
-        return ItemCard(item: items[index]);
+        final item = list[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            // PARAMETER PASSING: Navigates to detail and passes the item model
+            onTap: () => context.push('/item-detail', extra: item),
+            leading: CircleAvatar(
+              backgroundColor: AppColors.primaryDarkGreen.withValues(alpha: 0.1),
+              child: const Icon(Icons.inventory_2_outlined, color: AppColors.primaryDarkGreen),
+            ),
+            title: Text(
+              item.title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text('${item.category} • ${item.sellerCollege}', style: const TextStyle(fontSize: 11)),
+                const SizedBox(height: 2),
+                Text(
+                  item.type == 'SELL' ? '₱${item.price.toStringAsFixed(2)}' : item.type,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDarkGreen, fontSize: 13),
+                ),
+              ],
+            ),
+            // DELETE CRUD: Removes bookmark from SharedPreferences
+            trailing: IconButton(
+              tooltip: 'Delete from Local Storage',
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () {
+                db.toggleSaveItem(item.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Removed "${item.title}" from local storage.')),
+                );
+              },
+            ),
+          ),
+        );
       },
     );
   }
 
-  Widget _buildExternalTab(
-    BuildContext context,
-    MockDatabase db,
-    List<ExternalProductModel> products,
-  ) {
-    if (products.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.bookmark_border_rounded, size: 54, color: AppColors.mutedGray),
-              const SizedBox(height: 12),
-              const Text(
-                'No saved external API deals.',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textDark),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Browse items retrieved from the external REST API and tap "Save Locally" to persist them to local device storage.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: AppColors.mutedGray),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryDarkGreen,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () => context.push('/external-deals'),
-                icon: const Icon(Icons.public_rounded, size: 18),
-                label: const Text('Browse External API Deals'),
-              ),
-            ],
-          ),
+  Widget _buildExternalDealsList(BuildContext context, List<ExternalProductModel> list, MockDatabase db) {
+    if (list.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.public_off_rounded, size: 54, color: AppColors.textMedium),
+            SizedBox(height: 12),
+            Text(
+              'No saved external deals yet.',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark),
+            ),
+            SizedBox(height: 6),
+            Text(
+              'Browse External Deals and tap "Save Locally" to persist them here.',
+              style: TextStyle(fontSize: 12, color: AppColors.textMedium),
+            ),
+          ],
         ),
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: products.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: list.length,
       itemBuilder: (context, index) {
-        final product = products[index];
-
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.cardWhite,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.borderLight),
-            boxShadow: AppTheme.cardShadow,
-          ),
-          child: Row(
-            children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 72,
-                  height: 72,
-                  child: product.thumbnail.isNotEmpty
-                      ? Image.network(
-                          product.thumbnail,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.paleGreen,
-                            child: const Icon(Icons.image_not_supported_rounded, color: AppColors.mutedGray),
-                          ),
-                        )
-                      : Container(
-                          color: AppColors.paleGreen,
-                          child: const Icon(Icons.shopping_bag_rounded, color: AppColors.primaryDarkGreen),
-                        ),
+        final product = list[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            // PARAMETER PASSING: Navigates to deal details with product parameter
+            onTap: () => context.push('/deal-detail', extra: product),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 48,
+                height: 48,
+                color: Colors.white,
+                child: product.thumbnail.isNotEmpty
+                    ? Image.network(product.thumbnail, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.shopping_bag))
+                    : const Icon(Icons.shopping_bag),
+              ),
+            ),
+            title: Text(
+              product.title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(product.category.toUpperCase(), style: const TextStyle(fontSize: 10, color: AppColors.textMedium)),
+                const SizedBox(height: 2),
+                Text(
+                  '${product.formattedPricePhp} (\$${product.price.toStringAsFixed(2)})',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDarkGreen, fontSize: 12),
                 ),
-              ),
-              const SizedBox(width: 12),
-
-              // Title, Category & Price
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.paleGreen,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        product.category.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDarkGreen,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      product.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          product.formattedPricePhp,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDarkGreen,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '(\$${product.price.toStringAsFixed(0)})',
-                          style: const TextStyle(fontSize: 10, color: AppColors.mutedGray),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // Delete button (DELETE CRUD from local storage)
-              IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, color: AppColors.statusError),
-                tooltip: 'Remove from Local Storage',
-                onPressed: () async {
-                  await db.deleteExternalProduct(product.id);
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Removed "${product.title}" from local storage.'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
+            // DELETE CRUD: Removes external deal from SharedPreferences
+            trailing: IconButton(
+              tooltip: 'Delete from Local Storage',
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () {
+                db.toggleSaveExternalProduct(product);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Removed "${product.title}" from local storage.')),
+                );
+              },
+            ),
           ),
         );
       },
